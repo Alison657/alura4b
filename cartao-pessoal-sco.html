@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sco, cartão pessoal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Karla:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --lilas-fundo:#F4F0FC;
+    --lilas-claro:#E7E1F9;
+    --lilas-medio:#BCAFE9;
+    --lilas-forte:#7A68C6;
+    --azul-claro:#D8E8FA;
+    --azul-medio:#A6CAEF;
+    --rosa-claro:#FBDDEB;
+    --rosa-medio:#F2B7D3;
+    --menta-claro:#D6F1E3;
+    --amarelo-claro:#FDEFC7;
+    --papel:#FFFEFF;
+    --tinta:#463F66;
+    --tinta-fraca:#72698F;
+    --sombra:0 26px 60px -28px rgba(90,74,160,.45), 0 4px 14px -6px rgba(90,74,160,.25);
+    --raio:30px;
+    --fonte-titulo:"Baloo 2", ui-rounded, "Segoe UI", system-ui, sans-serif;
+    --fonte-texto:"Karla", ui-sans-serif, system-ui, sans-serif;
+  }
+
+  *{ box-sizing:border-box; }
+
+  html,body{ height:100%; }
+
+  body{
+    margin:0;
+    padding:clamp(20px,5vw,64px) clamp(14px,4vw,40px) 56px;
+    font-family:var(--fonte-texto);
+    color:var(--tinta);
+    background:
+      radial-gradient(60% 55% at 12% 6%,  rgba(246,183,211,.55), transparent 70%),
+      radial-gradient(55% 50% at 88% 4%,  rgba(166,202,239,.65), transparent 72%),
+      radial-gradient(70% 60% at 78% 96%, rgba(214,241,227,.75), transparent 70%),
+      radial-gradient(65% 55% at 8% 92%,  rgba(253,239,199,.7),  transparent 72%),
+      var(--lilas-fundo);
+    background-attachment:fixed;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:20px;
+    min-height:100%;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ---------- faíscas de fundo ---------- */
+  .palco{
+    position:relative;
+    width:min(940px, 100%);
+  }
+  .enfeite{
+    position:absolute;
+    pointer-events:none;
+    opacity:.85;
+  }
+  .enfeite--estrela1{ top:-34px; left:-26px; width:58px; color:var(--lilas-medio); }
+  .enfeite--estrela2{ top:-18px; right:-14px; width:40px; color:var(--rosa-medio); }
+  .enfeite--brilho{ bottom:-30px; right:-30px; width:64px; color:var(--azul-medio); }
+  .enfeite--coracao{ bottom:34px; left:-40px; width:44px; color:var(--rosa-medio); }
+
+  /* ---------- cartão ---------- */
+  .cartao{
+    perspective:1900px;
+    border:0;
+    padding:0;
+    background:transparent;
+    font:inherit;
+    color:inherit;
+    text-align:left;
+    cursor:pointer;
+    display:block;
+    width:100%;
+    border-radius:var(--raio);
+    animation:chegada .9s cubic-bezier(.2,.8,.2,1) both;
+  }
+  .cartao:focus-visible{ outline:3px solid var(--lilas-forte); outline-offset:6px; }
+
+  @keyframes chegada{
+    from{ opacity:0; transform:translateY(22px) scale(.985); }
+    to{ opacity:1; transform:none; }
+  }
+
+  .cartao__corpo{
+    display:grid;
+    transform-style:preserve-3d;
+    transition:transform .85s cubic-bezier(.3,.85,.25,1);
+  }
+  .cartao[aria-pressed="true"] .cartao__corpo{ transform:rotateY(180deg); }
+
+  .face{
+    grid-area:1 / 1;
+    position:relative;
+    backface-visibility:hidden;
+    -webkit-backface-visibility:hidden;
+    background:var(--papel);
+    border:1px solid rgba(188,175,233,.45);
+    border-radius:var(--raio);
+    box-shadow:var(--sombra);
+    padding:clamp(26px,4.4vw,46px);
+    overflow:hidden;
+  }
+  /* miolo do caderno: moldura pontilhada */
+  .face::after{
+    content:"";
+    position:absolute;
+    inset:14px;
+    border:1.6px dashed rgba(188,175,233,.7);
+    border-radius:20px;
+    pointer-events:none;
+  }
+  .face--verso{ transform:rotateY(180deg); }
+
+  /* manchas pastel decorativas dentro do cartão */
+  .mancha{
+    position:absolute;
+    border-radius:50%;
+    filter:blur(2px);
+    pointer-events:none;
+    opacity:.55;
+  }
+  .mancha--a{ width:230px; height:230px; top:-110px; right:-70px; background:radial-gradient(circle at 35% 35%, var(--azul-claro), rgba(214,232,250,0)); }
+  .mancha--b{ width:200px; height:200px; bottom:-110px; left:-70px; background:radial-gradient(circle at 60% 45%, var(--rosa-claro), rgba(251,221,235,0)); }
+  .mancha--c{ width:220px; height:220px; top:-120px; left:-80px; background:radial-gradient(circle at 45% 55%, var(--menta-claro), rgba(214,241,227,0)); }
+  .mancha--d{ width:210px; height:210px; bottom:-120px; right:-70px; background:radial-gradient(circle at 45% 45%, var(--amarelo-claro), rgba(253,239,199,0)); }
+
+  /* ---------- frente ---------- */
+  .frente-conteudo{ position:relative; z-index:1; display:flex; flex-direction:column; gap:clamp(18px,2.6vw,28px); }
+
+  .selo{
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    align-self:flex-start;
+    padding:7px 16px 7px 12px;
+    border-radius:999px;
+    background:linear-gradient(120deg, var(--lilas-claro), var(--azul-claro) 70%, var(--rosa-claro));
+    font-size:.86rem;
+    font-weight:600;
+    color:var(--lilas-forte);
+    letter-spacing:.01em;
+  }
+  .selo svg{ width:17px; height:17px; }
+  .selo__pontos{ display:inline-flex; gap:4px; margin-left:6px; }
+  .selo__pontos i{ width:9px; height:9px; border-radius:50%; display:block; }
+  .ponto--roxo{ background:#A594E5; }
+  .ponto--azul{ background:#8DBDEB; }
+  .ponto--menta{ background:#8ED8B4; }
+
+  .nome{
+    margin:0;
+    font-family:var(--fonte-titulo);
+    font-weight:800;
+    font-size:clamp(3.4rem,11vw,6.4rem);
+    line-height:.92;
+    letter-spacing:-.01em;
+    color:var(--tinta);
+    background:linear-gradient(96deg, var(--lilas-forte), #5F8FD6 62%, #D987B4);
+    -webkit-background-clip:text;
+    background-clip:text;
+    -webkit-text-fill-color:transparent;
+  }
+
+  .subtitulo{
+    margin:0;
+    max-width:46ch;
+    font-size:clamp(1rem,2.2vw,1.16rem);
+    line-height:1.55;
+    color:var(--tinta-fraca);
+  }
+
+  .etiquetas{
+    list-style:none;
+    margin:0;
+    padding:0;
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+  }
+  .etiqueta{
+    display:inline-flex;
+    align-items:center;
+    gap:9px;
+    padding:9px 15px 9px 12px;
+    border-radius:14px;
+    font-size:.92rem;
+    font-weight:600;
+    color:var(--tinta);
+    border:1.5px solid rgba(188,175,233,.55);
+    background:rgba(255,255,255,.7);
+  }
+  .etiqueta svg{ width:18px; height:18px; flex:none; }
+  .etiqueta--lilas{ background:var(--lilas-claro); border-color:rgba(165,148,229,.35); }
+  .etiqueta--azul{ background:var(--azul-claro); border-color:rgba(141,189,235,.35); }
+  .etiqueta--menta{ background:var(--menta-claro); border-color:rgba(142,216,180,.4); }
+  .etiqueta--rosa{ background:var(--rosa-claro); border-color:rgba(242,183,211,.45); }
+  .etiqueta--amarelo{ background:var(--amarelo-claro); border-color:rgba(233,205,131,.45); }
+
+  .rodape-frente{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding-top:clamp(14px,2.4vw,22px);
+    border-top:1.5px dashed rgba(188,175,233,.7);
+    font-size:.92rem;
+    color:var(--tinta-fraca);
+  }
+  .rodape-frente__dica{ display:inline-flex; align-items:center; gap:9px; font-weight:600; color:var(--lilas-forte); }
+  .rodape-frente__dica svg{ width:18px; height:18px; }
+
+  /* ---------- verso ---------- */
+  .verso-conteudo{ position:relative; z-index:1; display:flex; flex-direction:column; gap:clamp(18px,2.6vw,26px); }
+
+  .verso-topo{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:8px 16px;
+    padding-bottom:clamp(12px,2vw,18px);
+    border-bottom:1.5px dashed rgba(188,175,233,.7);
+  }
+  .verso-topo h2{
+    margin:0;
+    font-family:var(--fonte-titulo);
+    font-size:clamp(1.6rem,4vw,2.1rem);
+    font-weight:700;
+    line-height:1.1;
+  }
+  .verso-topo p{ margin:0; font-size:.92rem; color:var(--tinta-fraca); }
+
+  .grade{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(215px, 1fr));
+    gap:clamp(12px,2vw,18px);
+  }
+  .bloco{
+    position:relative;
+    padding:18px 18px 18px 18px;
+    border-radius:20px;
+    border:1.5px solid rgba(188,175,233,.4);
+    background:rgba(255,255,255,.72);
+  }
+  .bloco--lilas{ background:linear-gradient(160deg, rgba(231,225,249,.85), rgba(255,255,255,.9)); }
+  .bloco--azul{ background:linear-gradient(160deg, rgba(216,232,250,.85), rgba(255,255,255,.9)); }
+  .bloco--menta{ background:linear-gradient(160deg, rgba(214,241,227,.85), rgba(255,255,255,.9)); }
+  .bloco--rosa{ background:linear-gradient(160deg, rgba(251,221,235,.85), rgba(255,255,255,.9)); }
+  .bloco--amarelo{ background:linear-gradient(160deg, rgba(253,239,199,.85), rgba(255,255,255,.9)); }
+
+  .bloco__titulo{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin:0 0 10px;
+    font-family:var(--fonte-titulo);
+    font-size:1.06rem;
+    font-weight:700;
+    letter-spacing:.005em;
+  }
+  .bloco__titulo svg{ width:20px; height:20px; flex:none; }
+  .bloco__lista{
+    margin:0;
+    padding:0;
+    list-style:none;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    font-size:.95rem;
+    line-height:1.45;
+    color:#544C77;
+  }
+  .bloco__lista li{ display:flex; gap:9px; align-items:flex-start; }
+  .bloco__lista li::before{
+    content:"";
+    flex:none;
+    width:7px; height:7px;
+    margin-top:7px;
+    border-radius:50%;
+    background:var(--lilas-medio);
+  }
+  .bloco--azul .bloco__lista li::before{ background:var(--azul-medio); }
+  .bloco--menta .bloco__lista li::before{ background:#83CFA9; }
+  .bloco--rosa .bloco__lista li::before{ background:var(--rosa-medio); }
+  .bloco--amarelo .bloco__lista li::before{ background:#E7C472; }
+
+  .amostras-cores{ display:flex; gap:10px; flex-wrap:wrap; }
+  .amostra{
+    display:flex; align-items:center; gap:9px;
+    font-size:.95rem; color:#544C77;
+  }
+  .amostra i{
+    width:24px; height:24px; border-radius:9px; display:block;
+    box-shadow:inset 0 0 0 1.5px rgba(70,63,102,.12);
+  }
+  .cor-roxo{ background:linear-gradient(140deg,#C4B5F0,#9C86E3); }
+  .cor-azul{ background:linear-gradient(140deg,#BBD9F6,#8DBDEB); }
+
+  .assinatura{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:10px;
+    font-size:.86rem;
+    color:var(--tinta-fraca);
+  }
+  .assinatura svg{ width:16px; height:16px; color:var(--rosa-medio); }
+  .assinatura span{ display:inline-flex; align-items:center; gap:10px; }
+
+  /* ---------- legenda embaixo ---------- */
+  .legenda{
+    margin:0;
+    font-size:.9rem;
+    color:var(--tinta-fraca);
+    text-align:center;
+    max-width:52ch;
+    line-height:1.5;
+  }
+
+  @media (max-width:640px){
+    .enfeite--estrela1, .enfeite--estrela2, .enfeite--brilho, .enfeite--coracao{ display:none; }
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    .cartao{ animation:none; }
+    .cartao__corpo{ transition:none; }
+  }
+</style>
+</head>
+<body>
+
+<main class="palco">
+
+  <svg class="enfeite enfeite--estrela1" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <path d="M12 2.5c.6 3.9 1.9 5.2 5.8 5.8-3.9.6-5.2 1.9-5.8 5.8-.6-3.9-1.9-5.2-5.8-5.8 3.9-.6 5.2-1.9 5.8-5.8Z" fill="currentColor"/>
+    <path d="M18.6 15.4c.3 2 1 2.7 3 3-2 .3-2.7 1-3 3-.3-2-1-2.7-3-3 2-.3 2.7-1 3-3Z" fill="currentColor" opacity=".55"/>
+  </svg>
+  <svg class="enfeite enfeite--estrela2" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <path d="M12 3c.5 3.4 1.7 4.6 5.1 5.1-3.4.5-4.6 1.7-5.1 5.1-.5-3.4-1.7-4.6-5.1-5.1C10.3 7.6 11.5 6.4 12 3Z" fill="currentColor"/>
+  </svg>
+  <svg class="enfeite enfeite--brilho" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <circle cx="12" cy="12" r="4.2" fill="currentColor" opacity=".6"/>
+    <path d="M12 1.5v4M12 18.5v4M1.5 12h4M18.5 12h4M4.6 4.6l2.8 2.8M16.6 16.6l2.8 2.8M19.4 4.6l-2.8 2.8M7.4 16.6l-2.8 2.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+  </svg>
+  <svg class="enfeite enfeite--coracao" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <path d="M12 20s-7.5-4.6-7.5-9.6A4.4 4.4 0 0 1 12 7.7a4.4 4.4 0 0 1 7.5 2.7C19.5 15.4 12 20 12 20Z" fill="currentColor" opacity=".7"/>
+  </svg>
+
+  <button class="cartao" id="cartao" type="button" aria-pressed="false">
+    <div class="cartao__corpo">
+
+      <!-- ============ FRENTE ============ -->
+      <section class="face face--frente" aria-label="Frente do cartão">
+        <span class="mancha mancha--a" aria-hidden="true"></span>
+        <span class="mancha mancha--b" aria-hidden="true"></span>
+
+        <div class="frente-conteudo">
+
+          <p class="selo">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M12 3.2 14.6 9l6.2.6-4.7 4.1 1.4 6.1L12 16.7l-5.5 3.1 1.4-6.1L3.2 9.6 9.4 9 12 3.2Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+            </svg>
+            Cartão pessoal
+            <span class="selo__pontos" aria-hidden="true">
+              <i class="ponto--roxo"></i><i class="ponto--azul"></i><i class="ponto--menta"></i>
+            </span>
+          </p>
+
+          <h1 class="nome">Sco</h1>
+
+          <p class="subtitulo">
+            18 anos, ambivertido e gente da madrugada. Curte aprender fazendo, juntar
+            referência boa e criar coisa própria, de preferência entre uma música e outra.
+          </p>
+
+          <ul class="etiquetas">
+            <li class="etiqueta etiqueta--lilas">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M4.5 6.2c0-.9.7-1.5 1.6-1.4l2.7.3c.6.1 1 .5 1.2 1l.7 1.6c.3.7.2 1.5-.4 2l-1.2 1.1c.9 1.9 2.4 3.4 4.3 4.3l1.1-1.2c.5-.6 1.3-.7 2-.4l1.6.7c.5.2.9.7 1 1.3l.3 2.7c.1.9-.5 1.6-1.4 1.6C11.6 21.4 4.5 14.3 4.5 6.2Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+              </svg>
+              tecnologia e programação
+            </li>
+            <li class="etiqueta etiqueta--azul">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M4.6 14.4a5.4 5.4 0 1 1 10.9 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                <path d="M4.6 14.4V9.9M15.5 14.4V9.9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                <path d="M4.6 10.6h3.2v3h-3.2zM12.3 10.6h3.2v3h-3.2z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+              </svg>
+              fone quase sempre ligado
+            </li>
+            <li class="etiqueta etiqueta--menta">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M7.3 8.4h9.4a3.6 3.6 0 0 1 3.5 2.8l.8 3.4c.3 1.3-.6 2.5-1.9 2.5-.8 0-1.4-.4-1.8-1l-1-1.4H6.7l-1 1.4c-.4.6-1 1-1.8 1-1.3 0-2.2-1.2-1.9-2.5l.8-3.4a3.6 3.6 0 0 1 3.5-2.8Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+                <path d="M8.2 11.4v2M7.2 12.4h2M15.2 11.6h.01M17.2 13.2h.01" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+              </svg>
+              jogo por horas
+            </li>
+            <li class="etiqueta etiqueta--amarelo">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M20 14.4A8 8 0 1 1 9.6 4a6.6 6.6 0 0 0 10.4 10.4Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+              </svg>
+              rende de madrugada
+            </li>
+            <li class="etiqueta etiqueta--rosa">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M12 21s-6.7-4.1-6.7-8.6a4 4 0 0 1 6.7-2.5 4 4 0 0 1 6.7 2.5C18.7 16.9 12 21 12 21Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+              </svg>
+              bicho no pé: cachorro e gato
+            </li>
+            <li class="etiqueta etiqueta--lilas">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M12 21s-7-5.6-7-10.7A7 7 0 0 1 19 10.3C19 15.4 12 21 12 21Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+                <circle cx="12" cy="10.2" r="2.4" stroke="currentColor" stroke-width="1.7"/>
+              </svg>
+              Canadá na lista de viagem
+            </li>
+          </ul>
+
+          <div class="rodape-frente">
+            <span class="rodape-frente__dica">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M4 9.5A2.5 2.5 0 0 1 6.5 7h11A2.5 2.5 0 0 1 20 9.5v5A2.5 2.5 0 0 1 17.5 17h-11A2.5 2.5 0 0 1 4 14.5v-5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+                <path d="M9.6 7.2c1.6-2 4.1-2.6 5.8-1.4 1.7 1.2 2.1 3.5 1.4 4.9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+              </svg>
+              clica aqui pra virar o cartão
+            </span>
+            <span>tem mais coisa do outro lado</span>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ============ VERSO ============ -->
+      <section class="face face--verso" aria-label="Verso do cartão" aria-hidden="true">
+        <span class="mancha mancha--c" aria-hidden="true"></span>
+        <span class="mancha mancha--d" aria-hidden="true"></span>
+
+        <div class="verso-conteudo">
+
+          <div class="verso-topo">
+            <h2>O que preenche o dia</h2>
+            <p>o resto é detalhe</p>
+          </div>
+
+          <div class="grade">
+
+            <section class="bloco bloco--azul">
+              <h3 class="bloco__titulo">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M4.6 14.4a5.4 5.4 0 1 1 10.9 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                  <path d="M4.6 14.4V9.9M15.5 14.4V9.9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                  <path d="M4.6 10.6h3.2v3h-3.2zM12.3 10.6h3.2v3h-3.2z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+                </svg>
+                No fone
+              </h3>
+              <ul class="bloco__lista">
+                <li>eletrônica e EDM</li>
+                <li>MPB e bossa nova</li>
+                <li>lo-fi e ambient</li>
+                <li>K-pop e J-pop</li>
+                <li>rock e metal</li>
+                <li>música clássica</li>
+              </ul>
+            </section>
+
+            <section class="bloco bloco--rosa">
+              <h3 class="bloco__titulo">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <rect x="3.4" y="5.4" width="17.2" height="13.2" rx="3" stroke="currentColor" stroke-width="1.7"/>
+                  <path d="M10.4 9.9l4.2 2.6-4.2 2.6V9.9Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+                </svg>
+                Na tela
+              </h3>
+              <ul class="bloco__lista">
+                <li>mistério e suspense</li>
+                <li>ficção científica e fantasia</li>
+                <li>anime e mangá</li>
+              </ul>
+            </section>
+
+            <section class="bloco bloco--menta">
+              <h3 class="bloco__titulo">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M7.3 8.4h9.4a3.6 3.6 0 0 1 3.5 2.8l.8 3.4c.3 1.3-.6 2.5-1.9 2.5-.8 0-1.4-.4-1.8-1l-1-1.4H6.7l-1 1.4c-.4.6-1 1-1.8 1-1.3 0-2.2-1.2-1.9-2.5l.8-3.4a3.6 3.6 0 0 1 3.5-2.8Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+                  <path d="M8.2 11.4v2M7.2 12.4h2M15.2 11.6h.01M17.2 13.2h.01" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                </svg>
+                No controle
+              </h3>
+              <ul class="bloco__lista">
+                <li>simulação e sandbox</li>
+                <li>RPG e aventura</li>
+                <li>estratégia</li>
+                <li>casuais e mobile</li>
+              </ul>
+            </section>
+
+            <section class="bloco bloco--amarelo">
+              <h3 class="bloco__titulo">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M6.6 3.6v6.2a2.6 2.6 0 0 0 5.2 0V3.6M9.2 3.6v16.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M16.8 20.4V3.9c1.9.6 3.2 2.6 3.2 4.9 0 2.1-1.1 3.9-3.2 4.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                À mesa
+              </h3>
+              <ul class="bloco__lista">
+                <li>lasanha, sem discussão</li>
+                <li>jabuticaba</li>
+                <li>doce e sobremesa em geral</li>
+              </ul>
+            </section>
+
+            <section class="bloco bloco--lilas">
+              <h3 class="bloco__titulo">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M3.8 8.6a2.6 2.6 0 0 1 2.6-2.6h2.9L12 4.4l2.7 1.6h2.9a2.6 2.6 0 0 1 2.6 2.6v7a2.6 2.6 0 0 1-2.6 2.6H6.4a2.6 2.6 0 0 1-2.6-2.6v-7Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+                  <path d="M8.2 13.2l2 2 5-5.2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Jeito de aprender
+              </h3>
+              <ul class="bloco__lista">
+                <li>praticando, na tentativa e erro</li>
+                <li>projeto próprio como desculpa pra estudar</li>
+                <li>pico de energia depois da meia-noite</li>
+              </ul>
+            </section>
+
+            <section class="bloco bloco--lilas">
+              <h3 class="bloco__titulo">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M12 3v18M3 12h18" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                  <path d="M12 3c3 2.4 2.6 5.6 0 9-2.7-3.4-3-6.6 0-9ZM12 12c3 2.4 2.6 5.6 0 9-2.7-3.4-3-6.6 0-9Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+                  <path d="M12 12c-3 2.4-5.6 2.6-9 0 3.4-2.7 6.6-3 9 0ZM12 12c3 2.4 5.6 2.6 9 0-3.4-2.7-6.6-3-9 0Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+                </svg>
+                Cores de estimação
+              </h3>
+              <div class="amostras-cores">
+                <span class="amostra"><i class="cor-roxo"></i> roxo</span>
+                <span class="amostra"><i class="cor-azul"></i> azul</span>
+              </div>
+            </section>
+
+          </div>
+
+          <div class="assinatura">
+            <span>
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M12 20s-6.8-4.2-6.8-8.7a4.1 4.1 0 0 1 6.8-2.5 4.1 4.1 0 0 1 6.8 2.5C18.8 15.8 12 20 12 20Z" fill="currentColor"/>
+              </svg>
+              Lá no fundo o rumo é carreira em tecnologia
+            </span>
+          </div>
+
+        </div>
+      </section>
+
+    </div>
+  </button>
+
+  <p class="legenda">
+    Um cartão, dois lados: frente com o essencial, verso com o que costuma ocupar
+    suas horas. Dá pra editar direto no arquivo, tudo é HTML e CSS puro.
+  </p>
+
+</main>
+
+<script>
+  const cartao = document.getElementById('cartao');
+  const frente = cartao.querySelector('.face--frente');
+  const verso  = cartao.querySelector('.face--verso');
+
+  function virar(){
+    const virado = cartao.getAttribute('aria-pressed') === 'true';
+    cartao.setAttribute('aria-pressed', String(!virado));
+    frente.setAttribute('aria-hidden', String(!virado));
+    verso.setAttribute('aria-hidden', String(virado));
+  }
+
+  cartao.addEventListener('click', virar);
+</script>
+</body>
+</html>
